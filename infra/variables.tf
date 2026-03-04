@@ -45,3 +45,46 @@ variable "task_memory_mb" {
   type        = number
   default     = 512
 }
+
+# RDS
+variable "rds_db_name" {
+  description = "RDS database name"
+  type        = string
+  default     = "aws_ci_test"
+}
+
+variable "rds_username" {
+  description = "RDS master username"
+  type        = string
+  default     = "postgres"
+}
+
+variable "rds_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "rds_engine_version" {
+  description = "PostgreSQL engine version"
+  type        = string
+  default     = "16"
+}
+
+variable "rds_allocated_storage" {
+  description = "RDS allocated storage (GB)"
+  type        = number
+  default     = 20
+}
+
+variable "rds_max_allocated_storage" {
+  description = "RDS max allocated storage for autoscaling (GB)"
+  type        = number
+  default     = 100
+}
+
+variable "rds_skip_final_snapshot" {
+  description = "Skip final snapshot on RDS destroy (set false for prod)"
+  type        = bool
+  default     = true
+}

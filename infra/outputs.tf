@@ -32,3 +32,14 @@ output "alb_zone_id" {
   description = "ALB Route53 zone ID (for alias records if you add a custom domain)"
   value       = aws_lb.main.zone_id
 }
+
+output "rds_endpoint" {
+  description = "RDS instance endpoint (for debugging; app uses Secrets Manager DATABASE_URL)"
+  value       = aws_db_instance.main.address
+  sensitive   = false
+}
+
+output "database_url_secret_arn" {
+  description = "Secrets Manager ARN for DATABASE_URL (used by ECS task definition)"
+  value       = aws_secretsmanager_secret.backend_env.arn
+}

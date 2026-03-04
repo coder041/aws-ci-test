@@ -29,6 +29,23 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# Allow ECS to pull DATABASE_URL from Secrets Manager at task start
+data "aws_iam_policy_document" "ecs_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue"
+    ]
+    resources = [aws_secretsmanager_secret.backend_env.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "ecs_secrets" {
+  name   = "${local.name}-ecs-secrets"
+  role   = aws_iam_role.ecs_task_execution.id
+  policy = data.aws_iam_policy_document.ecs_secrets.json
+}
+
 # CloudWatch log group for backend container
 resource "aws_cloudwatch_log_group" "backend" {
   name              = "/ecs/${local.name}-backend-task"
@@ -75,6 +92,13 @@ resource "aws_ecs_task_definition" "backend" {
         retries     = 3
         startPeriod = 60
       }
+
+      secrets = [
+        {
+          name      = "DATABASE_URL"
+          valueFrom = aws_secretsmanager_secret.backend_env.arn
+        }
+      ]
     }
   ])
 

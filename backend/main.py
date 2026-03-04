@@ -1,7 +1,24 @@
-from fastapi import FastAPI
 from datetime import datetime
 
-app = FastAPI()
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from config import get_settings
+from routers import auth
+
+app = FastAPI(title="aws-ci-test", version="0.1.0")
+
+settings = get_settings()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in settings.cors_origins.split(",")],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+
 
 @app.get("/health")
 def health():
@@ -10,7 +27,6 @@ def health():
 
 @app.get("/api/hello")
 def hello():
-    """Simple API endpoint to verify deployment."""
     return {
         "message": "Hello from aws-ci-test backend",
         "endpoint": "api/hello",

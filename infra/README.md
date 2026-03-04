@@ -11,7 +11,11 @@ This directory defines the AWS infrastructure for **aws-ci-test**: ECR, ECS (Far
 | **ECS service** | `aws-ci-test-backend-svc` | `aws-ci-test-staging-backend-svc` |
 | **ALB** | `aws-ci-test-alb` | `aws-ci-test-staging-alb` |
 | **Target group** | `aws-ci-test-backend-tg` | `aws-ci-test-staging-backend-tg` |
+| **RDS PostgreSQL** | `aws-ci-test-db` | `aws-ci-test-staging-db` |
+| **Secrets Manager** | `aws-ci-test-backend-database-url` | `aws-ci-test-staging-backend-database-url` |
 | **Backend URL** | `http://<prod-alb-dns>` | `http://<staging-alb-dns>` |
+
+The backend container receives **DATABASE_URL** from Secrets Manager at runtime (full RDS connection string). On each deploy the container runs **Alembic migrations** then starts the app.
 
 ## Prerequisites
 
@@ -64,6 +68,8 @@ terraform apply
 
 After each apply, note the **outputs** (e.g. `backend_url`, `ecr_repository_name`) for that workspace. Use them for GitHub Actions variables.
 
+**Note:** The first `terraform apply` that creates RDS can take **about 5–10 minutes**. Later applies are faster.
+
 ## GitHub Actions variables
 
 In the repo **Settings → Secrets and variables → Actions → Variables**, set:
@@ -103,7 +109,15 @@ Backend URLs (no AWS console needed):
 - **Production:** `terraform workspace select default && terraform output -raw backend_url`
 - **Staging:** `terraform workspace select staging && terraform output -raw backend_url`
 
-Then e.g. `curl <backend_url>/health` and `curl <backend_url>/api/hello`.
+Then e.g. `curl <backend_url>/health` and `curl <backend_url>/api/hello`. Auth endpoints (`/auth/register`, `/auth/login`, `/auth/me`) use the RDS database.
+
+### RDS and migrations
+
+- **RDS**: One PostgreSQL 16 instance per workspace (default VPC, private; ECS tasks reach it via security group).
+- **DATABASE_URL**: Stored in Secrets Manager; ECS injects it into the backend container. The app and Alembic use it automatically.
+- **Migrations**: The backend image runs `alembic upgrade head` on startup, then starts uvicorn. No separate migration job needed.
+
+For production, set a strong **SECRET_KEY** (JWT signing) via the ECS task definition environment or Secrets Manager; the app default is for dev only.
 
 ## Variables (optional)
 
