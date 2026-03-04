@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+.env
+.venv/
+venv/
+
+.DS_Store
+
+# Node / frontend (future)
+node_modules/
+dist/
+build/
+
+# Python packaging (if added later)
+*.egg-info/
+*.egg
+dist/
+build/
