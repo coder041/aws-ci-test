@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars and adjust if needed.
+# terraform.tfvars is git-ignored by default; .example is committed.
+
+aws_region   = "us-west-2"
+project_name = "aws-ci-test"
+environment  = "dev"
+
+# ECR repo name (must match GitHub Actions ECR_REPOSITORY variable)
+ecr_repository_name = "test/aws-ci-test-backend"
+
+# Backend container port (FastAPI default 8000)
+backend_container_port = 8000
+
+# ECS service desired task count
+desired_task_count = 1
+
+# Fargate task size
+task_cpu        = 256   # 0.25 vCPU
+task_memory_mb  = 512

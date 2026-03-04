@@ -21,3 +21,10 @@ build/
 *.egg
 dist/
 build/
+
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfplan
